@@ -1,5 +1,7 @@
 package com.mycompany.lfa_trabalho2;
 
+import java.util.regex.Pattern;
+
 
 public class LFA_Trabalho2 {
     static final ExpressaoRegular ex = new ExpressaoRegular();
@@ -20,6 +22,9 @@ public class LFA_Trabalho2 {
     static final String CONDITIONAL = "(if\\(" + COMPARABLE + ex.BRANCOS + COMPARISON_OPERATORS + ex.BRANCOS + COMPARABLE + "\\))";
     
     
+    static final String TRES_OU_MAIS_ALGARISMOS = "^[01]{3,}$";
+    static final String POSITIVOS_E_IMPARES = "^0[01]*1$";
+    
     public static void functionRegEx(String arg){       
         ex.confere(FUNCTION_SIGNATURE, arg);
     }
@@ -39,6 +44,13 @@ public class LFA_Trabalho2 {
         ex.confere(MATH_EXPRESSION, arg);
     }
     
+    public static void tresMaisAlgoritmos(String arg) {
+        ex.confere(TRES_OU_MAIS_ALGARISMOS, arg);
+    }
+    
+    public static void positivosImpares(String arg) {
+        ex.confere(POSITIVOS_E_IMPARES, arg);
+    }
     
     public static void main(String[] args){
         System.out.println("\n1 - Teste de assinatura de funcoes:");
@@ -62,5 +74,15 @@ public class LFA_Trabalho2 {
         mathExprRegEx("3 + media[z].x");
         mathExprRegEx("soma(x, y) + 1");
         mathExprRegEx("-4 + beta * media[1].x * soma(a,b)/4 * vetor[5].idade");
+        
+        System.out.println("\n5 - Teste: Números com 3 ou mais algarismos");
+        tresMaisAlgoritmos("10101");
+        tresMaisAlgoritmos("1");
+        tresMaisAlgoritmos("111");
+        
+        System.out.println("\n6 - Teste: Números positivos e ímpares");
+        positivosImpares("1");
+        positivosImpares("001");
+        positivosImpares("101");
     }
 }
