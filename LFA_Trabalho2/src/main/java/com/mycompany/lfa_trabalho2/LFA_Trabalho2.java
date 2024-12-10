@@ -1,7 +1,5 @@
 package com.mycompany.lfa_trabalho2;
 
-import java.util.regex.Pattern;
-
 
 public class LFA_Trabalho2 {
     static final ExpressaoRegular ex = new ExpressaoRegular();
@@ -10,10 +8,13 @@ public class LFA_Trabalho2 {
     static final String FUNCTION_ARG = "(" + VAR_TYPE + ex.BRANCO + ex.IDENT + ")?";
     static final String FUNCTION_ARGS = "(\\(" + FUNCTION_ARG + "(," + ex.BRANCOS + FUNCTION_ARG + ")*\\))";
     static final String COMPARISON_OPERATORS = "(\\==|\\=|\\<|\\<=|\\>|\\>=|!=)";
-    static final String VECTOR = "(" + ex.IDENT + "\\[(" + ex.NUMEROS + "|" + ex.IDENT + ")\\](\\." + ex.IDENT + ")?)";
-    static final String FUNCTION_CALL = "(" + ex.IDENT + "\\(" + ex.IDENT + "(," + ex.BRANCOS + ex.IDENT + ")*" + "\\))";
-    static final String VALUE = "(" + ex.NUMEROS + "|" + VECTOR + "|" + ex.IDENT + "|" + FUNCTION_CALL + ")";
+    static final String FUNCTION_CALL = "(" + ex.IDENT + "(." + ex.IDENT + ")*" + "\\(" + ex.BRANCOS + "(" + ex.IDENT + "|" + ex.NUMEROS + ")" + ex.BRANCOS + "(," + ex.BRANCOS + "(" + ex.IDENT + "|" + ex.NUMEROS + ")" + ex.BRANCOS + ")*" + "\\))";
+    static final String VECTOR_INDEX = "(" + ex.BRANCOS + ex.NUMEROS + "|" + ex.IDENT + "|" + FUNCTION_CALL + ex.BRANCOS + ")";
     static final String OPERATORS = "(\\+|\\-|\\*|\\/|\\%)";
+    static final String VECTOR = "(" + ex.IDENT + "\\[(" + VECTOR_INDEX + "|((" + ex.BRANCOS + ex.NUMEROS + "|" + ex.IDENT + "|" + FUNCTION_CALL + ")" + ex.BRANCOS + OPERATORS
+            + ex.BRANCOS + "(" + ex.NUMEROS + "|" + ex.IDENT + "|" + FUNCTION_CALL + ")(" + ex.BRANCOS + 
+            OPERATORS + ex.BRANCOS + "(" + ex.NUMEROS + "|" + ex.IDENT + "|" + FUNCTION_CALL + "))*" + ")" + ")\\](\\." + ex.IDENT + ")*)";
+    static final String VALUE = "(" + ex.NUMEROS + "|" + VECTOR + "|" + ex.IDENT + "|" + FUNCTION_CALL + ")";
     
     static final String FUNCTION_SIGNATURE = "(" + VAR_TYPE + ex.BRANCOS + ex.IDENT + FUNCTION_ARGS + ")" + ex.BRANCOS + ";";
     static final String MATH_EXPRESSION = "(" + ex.BRANCOS + VALUE + ex.BRANCOS + OPERATORS + ex.BRANCOS + VALUE + ")(" + 
@@ -74,6 +75,8 @@ public class LFA_Trabalho2 {
         mathExprRegEx("3 + media[z].x");
         mathExprRegEx("soma(x, y) + 1");
         mathExprRegEx("-4 + beta * media[1].x * soma(a,b)/4 * vetor[5].idade");
+        mathExprRegEx("-4 + beta * media[1].x * soma(a,b)/4 * vetor[5+4+4 * 7 - soma(5,7)].idade");
+        mathExprRegEx("-4 + beta * media[1].x * soma(a,b)/4 * vetor[ 5 +4+ 4 * 7 - total].idade");
         
         System.out.println("\n5 - Teste: Números com 3 ou mais algarismos");
         tresMaisAlgoritmos("10101");
