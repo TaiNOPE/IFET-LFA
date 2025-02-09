@@ -36,17 +36,21 @@ public class Automata {
         this.initialState = "";
         
         // Inicia matriz de transição.
-        this.transitionMatrix = new ArrayList[states.length][alphabet.length];
+        // [alphabet.length+1] pois será adicionado a entrada vazia;
+        this.transitionMatrix = new ArrayList[states.length][alphabet.length + 1];
         
         // Inicia todas as células da matriz de transição com um ArrayList<String[]> vazio.
         for(int sta = 0; sta < states.length; sta++){
-            for(int alp = 0; alp < alphabet.length; alp++){
+            for(int alp = 0; alp < alphabet.length + 1; alp++){
                 this.transitionMatrix[sta][alp] = new ArrayList<>();
             }
         }
         
         // Atribui o alfabeto (passado pelo construtor do objeto) aceito pelo automato.
         this.alphabet.addAll(Arrays.asList(alphabet));
+        
+        // Adiciona entrada vazia no alfabeto.
+        this.alphabet.add("");
         
         // Atribui os estados (passado pelo construtor do objeto) aceitos pelo automato.
         this.states.addAll(Arrays.asList(states));
@@ -74,11 +78,11 @@ public class Automata {
     // Define o estado inicial do automato.
     public void setInitialState(String state){
         if( !this.isStateValid(state) ){
-            System.out.println("hell nah");
+            System.out.println("Estado inicial invalido: " + state);
             return;
         }
-        System.out.println("ok");
         this.initialState = state;
+        System.out.println("Estado inicial definido: " + state);
     }
     
     
@@ -86,11 +90,11 @@ public class Automata {
     // É possível ter vários estados finais.
     public void addFinalState(String state){
         if( !this.isStateValid(state) ){
-            System.out.println("hell nah");
+            System.out.println("Estado final invalido: " + state);
             return;
         }
-        System.out.println("ok");
         this.finalStates.add(state);
+        System.out.println("Estado final adicionado: " + state);
     }
     
     
@@ -99,15 +103,15 @@ public class Automata {
     // escreve [stackWrite] na PILHA e vai para o estado [nextState].
     public void setTransition(String state, String tapeRead, String stackRead, String stackWrite, String nextState){
         if( !this.isStateValid(state) ){
-            System.out.println("Estado invalido");
+            System.out.println("Estado atual invalido: " + state);
             return;
         }
-        if( !this.isLetterValid(tapeRead) ){
-            System.out.println("Letra invalida");
+        if( tapeRead.length() > 1 ){
+            System.out.println("Letra invalida: " + tapeRead);
             return;
         }
         if( !this.isStateValid(nextState) ){
-            System.out.println("Estado destino invalido");
+            System.out.println("Estado destino invalido: " + nextState);
             return;
         }
         
@@ -118,7 +122,7 @@ public class Automata {
         transition[2] = stackWrite;
         transition[3] = nextState;
         
-        System.out.println("Adicionando estado: " + state + "; tr: " + tapeRead + "; sr: " + stackRead + "; sw: " + stackWrite + "; tgt: " + nextState);
+        System.out.println("Transicao adicionada: " + state + "; tr: " + tapeRead + "; sr: " + stackRead + "; sw: " + stackWrite + "; tgt: " + nextState);
         
         int stateId = this.states.indexOf( state );
         int letterId = this.alphabet.indexOf( tapeRead );
@@ -128,7 +132,9 @@ public class Automata {
     
     // Teste se uma palavra é aceita pelo autômato.
     public boolean isWordAccepted(String word){
+        System.out.println("\n\n\nTestando a palavra: " + word);
         String currentState = initialState;
+        this.stack.clear();
         
         // Percorre cada letra da palavra.
         for(int i = 0; i < word.length(); i++){
@@ -169,23 +175,32 @@ public class Automata {
                 
                 // Testa se o valor lido da fita é compatível com esta transição.
                 if( tapeRead.equals(letter) ){
-                    System.out.println("\tEncontrado: tr = " + tapeRead + "; sr = " + stackRead + "; sw = " + stackWrite + "; ns = " + nextState);
+                    System.out.println("\tTestando transicao: tr = " + tapeRead + "; sr = " + stackRead + "; sw = " + stackWrite + "; ns = " + nextState);
                     
                     String lastStackItem;
                     
                     // Verifica se precisa ler algo da pilha.
                     if( !stackRead.equals("") ){
-                        lastStackItem = this.stack.removeLast();
+                        
+                        // Verifica se está tentando ler algo de uma pilha vazia.
+                        if( !this.stack.isEmpty() ){
+                            lastStackItem = this.stack.removeLast();
+                            System.out.println("\t\tValor lido da pilha: " + lastStackItem);
+                        }else{
+                            System.out.println("\t\tPilha vazia. Nao e possivel ler.");
+                            continue;
+                        }
                         
                         // Verifica se o valor lido da PILHA condiz com o esperado.
                         // Caso não, a palavra é rejeitada imediatamente.
                         if( !lastStackItem.equals(stackRead) ){
                             System.out.println("\t\tValor lido da pilha invalido. Esperado: " + stackRead + "; Encontrado: " + lastStackItem + ";");
                             
-                            // Interrompe o teste por completo.
+                            // Interrompe o teste e pula para proxima transição encontrada.
                             // A palavra não é aceita pois o item lido da pilha
                             // não condiz com o valor esperado.
-                            return false;
+                            
+                            continue;
                         }
                     }
                     
@@ -205,16 +220,44 @@ public class Automata {
                 }
             }
    
+            // Imprime a pilha.
+            System.out.print("\t\tPilha: ");
+            this.stack.forEach( (value) -> {
+                System.out.print(value + " ");
+            });
+            System.out.println("");
             // Neste ponto a letra lida não teve inconsistÊncias.
             System.out.println("\tNovo estado atual: " + currentState);
         }
         
-        if( finalStates.contains(currentState) ){
-            System.out.println("O ultimo estado e final.");
-            return true;
-        }else{
-            System.out.println("O ultimo estado nao e final.");
+        if( !finalStates.contains(currentState) ){
+            System.out.println("O automato nao parou em um estado final.");
+
+            // Verifica se é possivel fazer movimentos vazios do estado atual até um estado final.
+            System.out.println("Terminou em um estado nao final.");
+            System.out.println("Tentando chegar em um estado final por movimentos vazios...");
+            
+            var transitions = 
+                    this.transitionMatrix
+                            [this.states.indexOf(currentState)]
+                            [this.alphabet.indexOf("")]; // Entrada vazia
+            
+            for( int i = 0; i < transitions.size(); i++){
+                String[] tr = (String[]) transitions.get(i);
+                String nextState = tr[3];
+                
+                if( this.finalStates.contains(nextState) ){
+                    System.out.println("Foi possivel chegar em um estafo final.");
+                    return true;
+                }
+            }
+            
+            // Se nao for possivel chegar em um estado final por m,ovimentos vazios
+            System.out.println("Nao foi possivel chegar em um estado final");
             return false;
         }
+        
+        System.out.println("O automato parou em um estado final.");
+        return true;
     }
 }
